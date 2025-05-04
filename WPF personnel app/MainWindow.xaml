@@ -1,0 +1,165 @@
+﻿<Window x:Class="WPF_personnel_app.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF_personnel_app"
+        mc:Ignorable="d"
+        Title="Hotel Personnel App" Height="600" Width="900"
+        FontFamily="Segoe UI" FontSize="14">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Role Selection -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Select Your Role:" FontWeight="Bold" Margin="0,0,0,10"/>
+            <ComboBox x:Name="roleSelector" SelectionChanged="RoleSelection_Changed" Width="200" HorizontalAlignment="Left">
+                <ComboBoxItem Content="Cleaning"/>
+                <ComboBoxItem Content="Maintenance"/>
+                <ComboBoxItem Content="Room Service"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Task List -->
+            <DockPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Tasks" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top" Margin="0,0,0,10"/>
+                <ListView ItemsSource="{Binding Messages}" SelectedItem="{Binding SelectedMessage}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="10" Margin="0,5" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="5">
+                                <StackPanel>
+                                    <!-- Update these bindings to match your model -->
+                                    <TextBlock Text="{Binding Room.RoomName}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding WorkTypes.WorkTypeName}" TextWrapping="Wrap" Margin="0,5"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                        <TextBlock Text="Room: " FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding RoomID}" Margin="5,0,15,0"/>
+                                        <TextBlock Text="Status: " FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding MessageStatusTypes.MessageStatusName}" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </DockPanel>
+
+            <!-- Task Detail Panel -->
+            <DockPanel Grid.Column="1" Margin="10,0,0,0">
+                <TextBlock Text="Task Details" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top" Margin="0,0,0,10"/>
+                <Grid DockPanel.Dock="Bottom">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Task Information -->
+                    <StackPanel Grid.Row="0" Visibility="{Binding SelectedMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Text="{Binding SelectedMessage.Room.RoomName}" FontWeight="Bold" FontSize="18"/>
+                        <TextBlock Text="{Binding SelectedMessage.WorkTypes.WorkTypeName}" TextWrapping="Wrap" Margin="0,10"/>
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="1" Padding="10" Margin="0,10" CornerRadius="5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="Room ID:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedMessage.RoomID}" Grid.Row="0" Grid.Column="1" Margin="10,0,0,0"/>
+
+                                <TextBlock Text="Status:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedMessage.MessageStatusTypes.MessageStatusName}" Grid.Row="1" Grid.Column="1" Margin="10,0,0,0"/>
+
+                                <TextBlock Text="Type:" Grid.Row="2" Grid.Column="0" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedMessage.WorkTypes.WorkTypeName}" Grid.Row="2" Grid.Column="1" Margin="10,0,0,0"/>
+
+                                <TextBlock Text="Created:" Grid.Row="3" Grid.Column="0" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedMessage.CreationTime, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" 
+                                           Grid.Row="3" Grid.Column="1" Margin="10,0,0,0"/>
+                            </Grid>
+                        </Border>
+
+
+                        <!-- Task Update Area -->
+                        <TextBlock Text="Update:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBox Text="{Binding UpdateText, UpdateSourceTrigger=PropertyChanged}" 
+                                 TextWrapping="Wrap" AcceptsReturn="True" Height="100"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="startTaskButton" Content="Start Task" Width="120" 
+                                    Click="StartTask_Click" Margin="0,0,10,0"
+                                    IsEnabled="{Binding SelectedMessage.MessageStatusTypes.MessageStatusName, Converter={StaticResource StatusToEnabledConverter}, ConverterParameter=new}"/>
+
+                            <Button x:Name="completeTaskButton" Content="Complete Task" Width="120" 
+                                    Click="CompleteTask_Click" Margin="0,0,10,0"
+                                    IsEnabled="{Binding SelectedMessage.MessageStatusTypes.MessageStatusName, Converter={StaticResource StatusToEnabledConverter}, ConverterParameter=pending}"/>
+
+
+                            <Button x:Name="addUpdateButton" Content="Add Update" Width="120" 
+                                    Click="AddUpdate_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+
+                    <!-- Message Entries Display -->
+                    <GroupBox Header="Previous Updates" Margin="0,10,0,0" BorderBrush="#E0E0E0" Padding="5">
+                        <ListView ItemsSource="{Binding MessageEntries}" MaxHeight="150" 
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,5">
+                                        <TextBlock Text="{Binding EntryContent}" TextWrapping="Wrap"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                            <TextBlock Text="{Binding Account.Name}" FontSize="11" Foreground="DarkBlue"/>
+                                            <TextBlock Text=" - " FontSize="11" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding CreationTime, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" 
+                                                       FontSize="11" Foreground="Gray"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </GroupBox>
+
+
+
+
+
+<!-- No Task Selected Message -->
+                    <TextBlock Grid.Row="0" Text="Select a task to view details" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"
+                               Visibility="{Binding SelectedMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=inverse}"/>
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Height="30" VerticalAlignment="Bottom">
+            <TextBlock Text="{Binding SelectedRole, StringFormat=Current Role: \{0\}}" Margin="10,0,0,0"/>
+        </StatusBar>
+    </Grid>
+
+    <Window.Resources>
+        <!-- Converters -->
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <local:StatusToEnabledConverter x:Key="StatusToEnabledConverter"/>
+    </Window.Resources>
+</Window>
